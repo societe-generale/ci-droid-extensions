@@ -136,7 +136,7 @@
                 <version>2.5.3</version>
                 <configuration>
                     <stagingRepository>https://oss.sonatype.org/service/local/staging/deploy/maven2</stagingRepository>
-                    <tagNameFormat>cidroid-internal-api_@{project.version}</tagNameFormat>
+                    <tagNameFormat>cidroid-extensions_@{project.version}</tagNameFormat>
                     <localCheckout>true</localCheckout>
                     <pushChanges>false</pushChanges>
                     <useReleaseProfile>false</useReleaseProfile>
