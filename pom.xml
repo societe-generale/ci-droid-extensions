@@ -10,6 +10,17 @@
 
     <name>CI-droid extensions</name>
 
+    <description>extensions for CI-droid implementing the internal API</description>
+    <url>https://github.com/societe-generale/ci-droid-extensions</url>
+
+    <developers>
+        <developer>
+            <id>vincent-fuchs</id>
+            <name>Vincent FUCHS</name>
+            <email>vincent.fuchs@gmail.com</email>
+        </developer>
+    </developers>
+
     <licenses>
         <license>
             <name>Apache 2</name>
