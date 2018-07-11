@@ -91,11 +91,6 @@ public class AddXmlElementAction implements ActionToReplicate {
     }
 
     @Override
-    public String getType() {
-        return "addXmlElementAction";
-    }
-
-    @Override
     public void init(Map<String, String> updateActionInfos) {
 
         this.elementToAdd = updateActionInfos.get(ELEMENT_TO_ADD);

@@ -26,11 +26,6 @@ public class OverwriteStaticFileAction implements ActionToReplicate {
     }
 
     @Override
-    public String getType() {
-        return "overWriteStaticContentAction";
-    }
-
-    @Override
     public void init(Map<String, String> updateActionInfos) {
 
         this.staticContent = updateActionInfos.get("staticContent");

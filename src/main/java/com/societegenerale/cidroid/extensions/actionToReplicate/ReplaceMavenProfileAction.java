@@ -130,11 +130,6 @@ public class ReplaceMavenProfileAction implements ActionToReplicate {
         return null;
     }
 
-    @Override
-    public String getType() {
-        return "replaceProfileInPomXmlAction";
-    }
-
     private String convertXmlDocToString(Document initialPomXml)
             throws InstantiationException, IllegalAccessException, ClassNotFoundException {
 

@@ -28,11 +28,6 @@ public class SimpleReplaceAction implements ActionToReplicate {
     }
 
     @Override
-    public String getType() {
-        return "simpleReplaceAction";
-    }
-
-    @Override
     public String getDescriptionForUI() {
         return "simple replace in the file";
     }
