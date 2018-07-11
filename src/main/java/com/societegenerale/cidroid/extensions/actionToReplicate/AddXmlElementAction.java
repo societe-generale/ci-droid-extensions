@@ -21,6 +21,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
+import static com.societegenerale.cidroid.extensions.actionToReplicate.XMLUtils.prettyPrint;
+
 /**
  * An action that will look for an xpath element, and if found, will add an element in it, in last position (if there are existing children)
  */
@@ -71,17 +73,6 @@ public class AddXmlElementAction implements ActionToReplicate {
             throw new IssueProvidingContentException("issue while parsing "+elementInError+" - is it a valid XML doc ?", e);
         }
 
-    }
-
-    private String prettyPrint(Document originalDocument) throws IOException {
-
-        StringWriter sw = new StringWriter();
-
-        OutputFormat format = OutputFormat.createPrettyPrint();
-        XMLWriter writer = new XMLWriter(sw, format);
-        writer.write(originalDocument);
-
-        return sw.toString();
     }
 
     @Override
