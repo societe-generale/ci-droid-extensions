@@ -5,6 +5,7 @@
 ### Added
 
 ### Changed
+- upgraded to internal-api 1.0.2
 
 ### Deprecated
 
