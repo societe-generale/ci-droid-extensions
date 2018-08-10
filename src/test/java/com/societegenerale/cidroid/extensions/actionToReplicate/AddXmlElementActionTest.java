@@ -21,7 +21,14 @@ public class AddXmlElementActionTest {
 
     private AddXmlElementAction addXmlElementAction = new AddXmlElementAction();
 
-    private String initialXmlDoc = "<?xml version=\"1.0\" encoding=\"UTF-8\"?><project>\n" +
+
+    private String rootWithNamespace="<?xml version=\"1.0\" encoding=\"UTF-8\"?><project xmlns=\"http://maven.apache.org/POM/4.0.0\"\n" +
+            "         xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n" +
+            "         xsi:schemaLocation=\"http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd\">\n";
+
+    private String rootWithoutNamespace="<?xml version=\"1.0\" encoding=\"UTF-8\"?><project>";
+
+    private String coreContent =
             "\n" +
             "\t<dependencies>\n" +
             "\n" +
@@ -69,7 +76,7 @@ public class AddXmlElementActionTest {
         addXmlElementAction.init(additionalInfosForInstantiation);
 
         assertThatThrownBy(() -> {
-            addXmlElementAction.provideContent(initialXmlDoc);
+            addXmlElementAction.provideContent(rootWithoutNamespace+coreContent);
         }).isInstanceOf(IssueProvidingContentException.class)
                 .hasMessageContaining("elementToAdd");
     }
@@ -87,11 +94,45 @@ public class AddXmlElementActionTest {
     }
 
     @Test
-    public void shouldAddElementIfReferenceXPathIsFound() throws IssueProvidingContentException, IOException, SAXException {
+    public void shouldAddElementIfReferenceXPathIsFound_withoutNamespace() throws IssueProvidingContentException, IOException, SAXException {
 
-        String actualResult = addXmlElementAction.provideContent(initialXmlDoc);
+        String actualResult = addXmlElementAction.provideContent(rootWithoutNamespace+coreContent);
 
         String expectedResult = "<?xml version=\"1.0\" encoding=\"UTF-8\"?><project>\n" +
+                "\n" +
+                "\t<dependencies>\n" +
+                "\n" +
+                "\t</dependencies>\n" +
+                "\n" +
+                "\t<build>\n" +
+                "\n" +
+                "\t\t<existingElementInBuild>\n" +
+                "\t\t\tinteresting stuff !!\n" +
+                "\t\t</existingElementInBuild>\n" +
+
+                //expecting the element to be there
+                "\t\t<element>Hello World</element>\n" +
+
+                "\t</build>\n" +
+                "\n" +
+                "</project>";
+
+        log.info("actual result: " + actualResult);
+
+        XMLAssert.assertXMLEqual(actualResult, expectedResult);
+
+    }
+
+    @Test
+    public void shouldAddElementIfReferenceXPathIsFound_withNamespace() throws IssueProvidingContentException, IOException, SAXException {
+
+        additionalInfosForInstantiation.put(XPATH_UNDER_WHICH_ELEMENT_NEEDS_TO_BE_ADDED, "//*[local-name()='project']/*[local-name()='build']");
+
+        addXmlElementAction.init(additionalInfosForInstantiation);
+
+        String actualResult = addXmlElementAction.provideContent(rootWithNamespace+coreContent);
+
+        String expectedResult = rootWithNamespace +
                 "\n" +
                 "\t<dependencies>\n" +
                 "\n" +
@@ -123,11 +164,11 @@ public class AddXmlElementActionTest {
 
         addXmlElementAction.init(additionalInfosForInstantiation);
 
-        String actualResult = addXmlElementAction.provideContent(initialXmlDoc);
+        String actualResult = addXmlElementAction.provideContent(rootWithoutNamespace+coreContent);
 
         log.info("actual result: " + actualResult);
 
-        XMLAssert.assertXMLEqual(actualResult, initialXmlDoc);
+        XMLAssert.assertXMLEqual(actualResult, rootWithoutNamespace+coreContent);
 
     }
 
