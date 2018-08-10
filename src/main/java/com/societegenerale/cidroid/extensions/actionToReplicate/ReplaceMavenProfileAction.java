@@ -39,8 +39,8 @@ import java.util.Optional;
  * Note : output XML will be encoded in UTF-8.
  */
 @Data
-@AllArgsConstructor
 @NoArgsConstructor
+@AllArgsConstructor
 @ToString(callSuper = true)
 @Slf4j
 public class ReplaceMavenProfileAction implements ActionToReplicate {

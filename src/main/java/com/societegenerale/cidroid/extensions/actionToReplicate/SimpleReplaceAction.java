@@ -13,7 +13,6 @@ import java.util.Map;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
 @ToString(callSuper = true)
 public class SimpleReplaceAction implements ActionToReplicate {
 

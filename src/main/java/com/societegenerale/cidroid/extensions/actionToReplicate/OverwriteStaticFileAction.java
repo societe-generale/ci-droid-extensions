@@ -4,7 +4,10 @@ import com.societegenerale.cidroid.api.ResourceToUpdate;
 import com.societegenerale.cidroid.api.actionToReplicate.ActionToReplicate;
 import com.societegenerale.cidroid.api.actionToReplicate.fields.ExpectedField;
 import com.societegenerale.cidroid.api.actionToReplicate.fields.TextArea;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 import java.util.Arrays;
 import java.util.List;
@@ -13,7 +16,6 @@ import java.util.Map;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
 @ToString(callSuper = true)
 public class OverwriteStaticFileAction implements ActionToReplicate {
 

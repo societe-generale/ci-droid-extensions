@@ -5,18 +5,18 @@ import com.societegenerale.cidroid.api.ResourceToUpdate;
 import com.societegenerale.cidroid.api.actionToReplicate.ActionToReplicate;
 import com.societegenerale.cidroid.api.actionToReplicate.fields.ExpectedField;
 import com.societegenerale.cidroid.api.actionToReplicate.fields.TextField;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.ToString;
 import org.dom4j.Document;
 import org.dom4j.DocumentException;
 import org.dom4j.Element;
 import org.dom4j.Node;
-import org.dom4j.io.OutputFormat;
 import org.dom4j.io.SAXReader;
-import org.dom4j.io.XMLWriter;
 import org.xml.sax.InputSource;
 
 import java.io.IOException;
 import java.io.StringReader;
-import java.io.StringWriter;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -26,6 +26,9 @@ import static com.societegenerale.cidroid.extensions.actionToReplicate.XMLUtils.
 /**
  * An action that will look for an xpath element, and if found, will add an element in it, in last position (if there are existing children)
  */
+@Data
+@NoArgsConstructor
+@ToString(callSuper = true)
 public class AddXmlElementAction implements ActionToReplicate {
 
     protected static final String ELEMENT_TO_ADD = "elementToAdd";
