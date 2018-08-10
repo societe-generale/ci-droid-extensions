@@ -5,13 +5,20 @@
 ### Added
 
 ### Changed
-- upgraded to internal-api 1.0.2
 
 ### Deprecated
 
 ### Removed
 
 ### Fixed
+
+## [1.0.3] - 2018-08-10
+- reviewed Lombok annotations : classes without the NoArgConstructor can't be deserialized by Jackson
+
+## [1.0.2] - 2018-08-04
+
+### Changed
+- upgraded to internal-api 1.0.2
 
 ## [1.0.1] - 2018-07-11
 
