@@ -11,6 +11,8 @@
 ### Removed
 
 ### Fixed
+- issues related to namespace in AddXmlElementAction 
+- documented how to specify the xpath regardless of namespace when using RemoveXmlElementAction
 
 ## [1.0.3] - 2018-08-10
 - reviewed Lombok annotations : classes without the NoArgConstructor can't be deserialized by Jackson
