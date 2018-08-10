@@ -12,7 +12,6 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-import static com.societegenerale.cidroid.extensions.actionToReplicate.AddXmlElementAction.XPATH_UNDER_WHICH_ELEMENT_NEEDS_TO_BE_ADDED;
 import static com.societegenerale.cidroid.extensions.actionToReplicate.RemoveXmlElementAction.XPATH_ELEMENT_THAT_NEEDS_TO_BE_REMOVED;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
@@ -21,8 +20,14 @@ public class RemoveXmlElementActionTest {
 
     private RemoveXmlElementAction removeXmlElementAction = new RemoveXmlElementAction();
 
-    private String initialXmlDoc = "<?xml version=\"1.0\" encoding=\"UTF-8\"?><project>\n" +
-            "\n" +
+    private String rootWithNamespace="<project xmlns=\"http://maven.apache.org/POM/4.0.0\"\n" +
+            "         xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n" +
+            "         xsi:schemaLocation=\"http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd\">\n";
+
+    private String rootWithoutNamespace="<project>";
+
+
+    private String coreContent = "\n" +
             "\t<dependencies>\n" +
             "\n" +
             "\t</dependencies>\n" +
@@ -45,20 +50,34 @@ public class RemoveXmlElementActionTest {
         XMLUnit.setIgnoreWhitespace(true);
         XMLUnit.setIgnoreAttributeOrder(true);
 
-        additionalInfosForInstantiation.put(XPATH_ELEMENT_THAT_NEEDS_TO_BE_REMOVED, "//project/build/existingElementInBuild");
-
-        removeXmlElementAction.init(additionalInfosForInstantiation);
-
     }
 
     @Test
-    public void shouldRemoveElementIfReferenceXPathIsFound() throws IssueProvidingContentException, IOException, SAXException {
+    public void shouldRemoveElementIfReferenceXPathIsFound_withNamespace() throws IssueProvidingContentException, IOException, SAXException {
 
-        String actualResult = removeXmlElementAction.provideContent(initialXmlDoc);
+        defineXpathElementToRemove("//*[local-name()='project']/*[local-name()='build']/*[local-name()='existingElementInBuild']");
+
+        String actualResult = removeXmlElementAction.provideContent(rootWithNamespace+coreContent);
 
         log.info("actual result: " + actualResult);
 
-        String expectedResult = "<project><dependencies></dependencies><build></build></project>";
+        String expectedResult = rootWithNamespace +
+                "           <dependencies></dependencies><build></build></project>";
+
+        XMLAssert.assertXMLEqual(actualResult, expectedResult);
+    }
+
+    @Test
+    public void shouldRemoveElementIfReferenceXPathIsFound_withoutNamespace() throws IssueProvidingContentException, IOException, SAXException {
+
+        defineXpathElementToRemove("/project/build/existingElementInBuild");
+
+        String actualResult = removeXmlElementAction.provideContent(rootWithoutNamespace+coreContent);
+
+        log.info("actual result: " + actualResult);
+
+        String expectedResult = rootWithoutNamespace +
+                "           <dependencies></dependencies><build></build></project>";
 
         XMLAssert.assertXMLEqual(actualResult, expectedResult);
     }
@@ -66,15 +85,13 @@ public class RemoveXmlElementActionTest {
     @Test
     public void shouldReturnSameDocumentWhenXPathNotFound() throws IssueProvidingContentException, IOException, SAXException {
 
-        additionalInfosForInstantiation.put(XPATH_ELEMENT_THAT_NEEDS_TO_BE_REMOVED, "//project/unknownElement");
+        defineXpathElementToRemove("//project/unknownElement");
 
-        removeXmlElementAction.init(additionalInfosForInstantiation);
-
-        String actualResult = removeXmlElementAction.provideContent(initialXmlDoc);
+        String actualResult = removeXmlElementAction.provideContent(rootWithoutNamespace+coreContent);
 
         log.info("actual result: " + actualResult);
 
-        XMLAssert.assertXMLEqual(actualResult, initialXmlDoc);
+        XMLAssert.assertXMLEqual(actualResult, rootWithoutNamespace+coreContent);
 
     }
 
@@ -86,6 +103,12 @@ public class RemoveXmlElementActionTest {
         }).isInstanceOf(IssueProvidingContentException.class)
                 .hasMessageContaining("original document");
 
+    }
+
+    private void defineXpathElementToRemove(String xpathElementToRemove){
+        additionalInfosForInstantiation.put(XPATH_ELEMENT_THAT_NEEDS_TO_BE_REMOVED, xpathElementToRemove);
+
+        removeXmlElementAction.init(additionalInfosForInstantiation);
     }
 
 }
