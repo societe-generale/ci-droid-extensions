@@ -20,11 +20,11 @@ public class RemoveXmlElementActionTest {
 
     private RemoveXmlElementAction removeXmlElementAction = new RemoveXmlElementAction();
 
-    private String rootWithNamespace="<project xmlns=\"http://maven.apache.org/POM/4.0.0\"\n" +
+    private String rootWithNamespace="<?xml version=\"1.0\" encoding=\"UTF-8\"?><project xmlns=\"http://maven.apache.org/POM/4.0.0\"\n" +
             "         xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n" +
             "         xsi:schemaLocation=\"http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd\">\n";
 
-    private String rootWithoutNamespace="<project>";
+    private String rootWithoutNamespace="<?xml version=\"1.0\" encoding=\"UTF-8\"?><project>";
 
 
     private String coreContent = "\n" +
