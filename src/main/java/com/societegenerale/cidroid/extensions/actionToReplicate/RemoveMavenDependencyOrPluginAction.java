@@ -3,6 +3,8 @@ package com.societegenerale.cidroid.extensions.actionToReplicate;
 import com.societegenerale.cidroid.api.IssueProvidingContentException;
 import com.societegenerale.cidroid.api.ResourceToUpdate;
 import com.societegenerale.cidroid.api.actionToReplicate.ActionToReplicate;
+import com.societegenerale.cidroid.api.actionToReplicate.fields.ExpectedField;
+import com.societegenerale.cidroid.api.actionToReplicate.fields.TextField;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
@@ -12,10 +14,7 @@ import org.xml.sax.InputSource;
 
 import java.io.IOException;
 import java.io.StringReader;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static com.societegenerale.cidroid.extensions.actionToReplicate.XMLUtils.prettyPrint;
 
@@ -92,6 +91,17 @@ public class RemoveMavenDependencyOrPluginAction implements ActionToReplicate {
             throw new IssueProvidingContentException("problem while writing the new content during processing", e);
         }
 
+    }
+
+    @Override
+    public List<ExpectedField> getExpectedUIFields() {
+        return Arrays.asList(new TextField(ARTIFACT_ID, "the artifactId of the plugin or dependency to remove"),
+                             new TextField(GROUP_ID, "Optional - the groupId of the plugin or dependency to remove"));
+    }
+
+    @Override
+    public String getDescriptionForUI() {
+        return "will remove a dependency or plugin in pom.xml, depending on provided artifactId";
     }
 
     private List<Node> findNodesMatchingInDoc(Document pomXml, String xpath){
