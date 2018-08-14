@@ -2,25 +2,36 @@ package com.societegenerale.cidroid.extensions.actionToReplicate;
 
 import com.societegenerale.cidroid.api.IssueProvidingContentException;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.io.IOUtils;
+import org.apache.maven.model.Model;
+import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
+import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
 import org.custommonkey.xmlunit.XMLAssert;
 import org.custommonkey.xmlunit.XMLUnit;
 import org.junit.Before;
 import org.junit.Test;
 import org.xml.sax.SAXException;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
 import static com.societegenerale.cidroid.extensions.actionToReplicate.AddXmlElementAction.ELEMENT_TO_ADD;
 import static com.societegenerale.cidroid.extensions.actionToReplicate.AddXmlElementAction.XPATH_UNDER_WHICH_ELEMENT_NEEDS_TO_BE_ADDED;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Java6Assertions.assertThat;
 
 @Slf4j
 public class AddXmlElementActionTest {
 
     private AddXmlElementAction addXmlElementAction = new AddXmlElementAction();
 
+    private MavenXpp3Reader pomModelreader = new MavenXpp3Reader();
+
+    private final Charset OUTPUT_ENCODING= StandardCharsets.UTF_8;
 
     private String rootWithNamespace="<?xml version=\"1.0\" encoding=\"UTF-8\"?><project xmlns=\"http://maven.apache.org/POM/4.0.0\"\n" +
             "         xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n" +
@@ -170,6 +181,34 @@ public class AddXmlElementActionTest {
 
         XMLAssert.assertXMLEqual(actualResult, rootWithoutNamespace+coreContent);
 
+    }
+
+    @Test
+    public void shouldAddMavenProperty() throws IssueProvidingContentException, IOException, XmlPullParserException {
+
+        String pomFile="dummyPomXml_dependenciesRemoval.xml";
+
+        String valueToAdd="${project.build.directory}/coverage-results";
+
+        ClassLoader classLoader = getClass().getClassLoader();
+
+        Model pomBeforeActionPerformed = pomModelreader.read(classLoader.getResourceAsStream(pomFile));
+        // checking BEFORE the action that property is NOT there..
+        assertThat(pomBeforeActionPerformed.getProperties().getProperty("project.coverage.directory")).isNull();
+
+        additionalInfosForInstantiation.put(XPATH_UNDER_WHICH_ELEMENT_NEEDS_TO_BE_ADDED, "//*[local-name()='project']/*[local-name()='properties']");
+        additionalInfosForInstantiation.put(ELEMENT_TO_ADD, "<project.coverage.directory>"+valueToAdd+"</project.coverage.directory>");
+
+        addXmlElementAction.init(additionalInfosForInstantiation);
+
+        String pomXmlBeforeAction= IOUtils.toString(classLoader.getResourceAsStream(pomFile), StandardCharsets.UTF_8);
+        String actualResult = addXmlElementAction.provideContent(pomXmlBeforeAction);
+
+        log.info("actual result: " + actualResult);
+
+        Model newPom = pomModelreader.read(new ByteArrayInputStream(actualResult.getBytes(OUTPUT_ENCODING)));
+
+        assertThat(newPom.getProperties().getProperty("project.coverage.directory")).isEqualTo(valueToAdd);
     }
 
 }
