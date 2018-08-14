@@ -3,6 +3,7 @@
 ## [Unreleased]
 
 ### Added
+- new RemoveMavenDependencyOrPluginAction
 
 ### Changed
 
