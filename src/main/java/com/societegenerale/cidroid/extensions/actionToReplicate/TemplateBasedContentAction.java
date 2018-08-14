@@ -15,7 +15,7 @@ import java.util.Map;
 
 @Data
 @NoArgsConstructor
-@ToString(callSuper = true)
+@ToString
 public class TemplateBasedContentAction implements ActionToReplicate {
 
     protected final static String PLACEHOLDER_VALUE = "\\$\\{placeHolderValue}";

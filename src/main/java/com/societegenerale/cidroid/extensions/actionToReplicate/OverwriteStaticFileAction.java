@@ -16,7 +16,7 @@ import java.util.Map;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@ToString(callSuper = true)
+@ToString
 public class OverwriteStaticFileAction implements ActionToReplicate {
 
     private String staticContent;

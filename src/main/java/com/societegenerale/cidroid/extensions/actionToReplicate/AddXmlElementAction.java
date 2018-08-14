@@ -11,7 +11,6 @@ import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 import org.dom4j.*;
 import org.dom4j.io.SAXReader;
-import org.dom4j.tree.DefaultElement;
 import org.xml.sax.InputSource;
 
 import java.io.IOException;
@@ -28,8 +27,8 @@ import static com.societegenerale.cidroid.extensions.actionToReplicate.XMLUtils.
  */
 @Data
 @NoArgsConstructor
-@ToString(callSuper = true)
 @Slf4j
+@ToString
 public class AddXmlElementAction implements ActionToReplicate {
 
     protected static final String ELEMENT_TO_ADD = "elementToAdd";

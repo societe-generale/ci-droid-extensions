@@ -41,7 +41,7 @@ import java.util.Optional;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@ToString(callSuper = true)
+@ToString
 @Slf4j
 public class ReplaceMavenProfileAction implements ActionToReplicate {
 

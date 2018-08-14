@@ -5,6 +5,7 @@ import com.societegenerale.cidroid.api.ResourceToUpdate;
 import com.societegenerale.cidroid.api.actionToReplicate.ActionToReplicate;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 import org.dom4j.*;
 import org.dom4j.io.SAXReader;
 import org.xml.sax.InputSource;
@@ -23,6 +24,7 @@ import static com.societegenerale.cidroid.extensions.actionToReplicate.XMLUtils.
  */
 @Data
 @NoArgsConstructor
+@ToString
 public class RemoveMavenDependencyOrPluginAction implements ActionToReplicate {
 
     protected static final String ARTIFACT_ID = "artifactId";

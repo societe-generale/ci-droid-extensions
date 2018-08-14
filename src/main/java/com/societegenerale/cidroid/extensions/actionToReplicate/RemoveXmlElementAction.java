@@ -33,7 +33,7 @@ import static com.societegenerale.cidroid.extensions.actionToReplicate.XMLUtils.
  */
 @Data
 @NoArgsConstructor
-@ToString(callSuper = true)
+@ToString
 @Slf4j
 public class RemoveXmlElementAction implements ActionToReplicate {
 

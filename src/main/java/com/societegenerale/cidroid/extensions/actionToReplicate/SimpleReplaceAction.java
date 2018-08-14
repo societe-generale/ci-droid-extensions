@@ -4,7 +4,10 @@ import com.societegenerale.cidroid.api.ResourceToUpdate;
 import com.societegenerale.cidroid.api.actionToReplicate.ActionToReplicate;
 import com.societegenerale.cidroid.api.actionToReplicate.fields.ExpectedField;
 import com.societegenerale.cidroid.api.actionToReplicate.fields.TextField;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 import java.util.Arrays;
 import java.util.List;
@@ -13,7 +16,7 @@ import java.util.Map;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@ToString(callSuper = true)
+@ToString
 public class SimpleReplaceAction implements ActionToReplicate {
 
     private String initialValue;
