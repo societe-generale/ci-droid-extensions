@@ -3,7 +3,6 @@
 ## [Unreleased]
 
 ### Added
-- new RemoveMavenDependencyOrPluginAction
 
 ### Changed
 
@@ -12,10 +11,20 @@
 ### Removed
 
 ### Fixed
+
+## [1.0.4] - 2018-08-14
+
+### Added
+- new RemoveMavenDependencyOrPluginAction
+- some tests, to show examples
+
+### Fixed
 - issues related to namespace in AddXmlElementAction 
 - documented how to specify the xpath regardless of namespace when using RemoveXmlElementAction
 
 ## [1.0.3] - 2018-08-10
+
+### Fixed
 - reviewed Lombok annotations : classes without the NoArgConstructor can't be deserialized by Jackson
 
 ## [1.0.2] - 2018-08-04
