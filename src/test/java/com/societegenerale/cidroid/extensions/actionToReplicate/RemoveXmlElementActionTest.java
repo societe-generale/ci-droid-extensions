@@ -2,18 +2,26 @@ package com.societegenerale.cidroid.extensions.actionToReplicate;
 
 import com.societegenerale.cidroid.api.IssueProvidingContentException;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.io.IOUtils;
+import org.apache.maven.model.Model;
+import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
+import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
 import org.custommonkey.xmlunit.XMLAssert;
 import org.custommonkey.xmlunit.XMLUnit;
 import org.junit.Before;
 import org.junit.Test;
 import org.xml.sax.SAXException;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
 import static com.societegenerale.cidroid.extensions.actionToReplicate.RemoveXmlElementAction.XPATH_ELEMENT_THAT_NEEDS_TO_BE_REMOVED;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Java6Assertions.assertThat;
 
 @Slf4j
 public class RemoveXmlElementActionTest {
@@ -43,6 +51,10 @@ public class RemoveXmlElementActionTest {
             "</project>";
 
     private Map<String, String> additionalInfosForInstantiation = new HashMap<>();
+
+    private MavenXpp3Reader pomModelreader = new MavenXpp3Reader();
+
+    private final Charset OUTPUT_ENCODING= StandardCharsets.UTF_8;
 
     @Before
     public void setup() {
@@ -80,6 +92,29 @@ public class RemoveXmlElementActionTest {
                 "           <dependencies></dependencies><build></build></project>";
 
         XMLAssert.assertXMLEqual(actualResult, expectedResult);
+    }
+
+    @Test
+    public void shouldRemoveProperties() throws IssueProvidingContentException, IOException, XmlPullParserException {
+
+        String pomFile="dummyPomXml_dependenciesRemoval.xml";
+
+        defineXpathElementToRemove("//*[local-name()='project']/*[local-name()='properties']/*[local-name()='java.version']");
+
+        ClassLoader classLoader = getClass().getClassLoader();
+
+        Model pomBeforeActionPerformed = pomModelreader.read(classLoader.getResourceAsStream(pomFile));
+        // checking BEFORE the action that property is there..
+        assertThat(pomBeforeActionPerformed.getProperties().getProperty("java.version")).isEqualTo("1.8");
+
+        String pomXmlBeforeAction=IOUtils.toString(classLoader.getResourceAsStream(pomFile), StandardCharsets.UTF_8);
+        String actualResult = removeXmlElementAction.provideContent(pomXmlBeforeAction);
+
+        log.info("actual result: " + actualResult);
+
+        Model newPom = pomModelreader.read(new ByteArrayInputStream(actualResult.getBytes(OUTPUT_ENCODING)));
+
+        assertThat(newPom.getProperties().getProperty("java.version")).isNull();
     }
 
     @Test
