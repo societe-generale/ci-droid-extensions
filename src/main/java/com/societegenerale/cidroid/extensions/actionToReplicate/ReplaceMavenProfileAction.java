@@ -39,6 +39,8 @@ public class ReplaceMavenProfileAction extends AddXmlElementAction {
 
     private String newProfileContent;
 
+    private final String PROFILES_XPATH="//*[local-name()='project']/*[local-name()='profiles']";
+
     @Override
     public void init(Map<String, String> updateActionInfos) {
 
@@ -89,10 +91,9 @@ public class ReplaceMavenProfileAction extends AddXmlElementAction {
             return prettyPrint(doc);
 
         } catch (DocumentException | IOException e) {
-            log.warn("problem while parsing pom.xml and/or modifying it", e);
+            throw new IssueProvidingContentException("problem while parsing pom.xml and/or modifying it",e);
         }
 
-        return null;
     }
 
     private Node removeExistingProfile(List<Node> expectedProfileSection) {
@@ -100,11 +101,11 @@ public class ReplaceMavenProfileAction extends AddXmlElementAction {
     }
 
     private List<Node> findProfileNodeWithId(Document doc, String profileId) {
-        return doc.selectNodes("//*[local-name()='project']/*[local-name()='profiles']/*[local-name()='profile']/*[local-name()='id' and text()='"+profileId+"']");
+        return doc.selectNodes(PROFILES_XPATH+"/*[local-name()='profile']/*[local-name()='id' and text()='"+profileId+"']");
     }
 
     private List<Node> findProfilesNode(Document doc) {
-        return doc.selectNodes("//*[local-name()='project']/*[local-name()='profiles']");
+        return doc.selectNodes(PROFILES_XPATH);
     }
 
 }
