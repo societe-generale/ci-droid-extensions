@@ -5,6 +5,7 @@
 ### Added
 
 ### Changed
+- Issue #3 : refactored ReplaceMavenProfileAction
 
 ### Deprecated
 
