@@ -75,12 +75,12 @@ public class AddXmlElementAction implements ActionToReplicate {
      * @param documentToAdd
      * @param lastElementInOriginalDocument
      */
-    private void putDocumentToAddUnderSameNamespaceAsParent(Document documentToAdd, Element lastElementInOriginalDocument) {
+    protected void putDocumentToAddUnderSameNamespaceAsParent(Document documentToAdd, Element lastElementInOriginalDocument) {
         Namespace parentNamespace=lastElementInOriginalDocument.getNamespace();
         documentToAdd.accept(new NamespaceChangingVisitor(Namespace.NO_NAMESPACE, parentNamespace));
     }
 
-    private Document parseStringIntoDocument(String documentToProcess, String elementInError) throws IssueProvidingContentException {
+    protected Document parseStringIntoDocument(String documentToProcess, String elementInError) throws IssueProvidingContentException {
 
         SAXReader reader = new SAXReader();
 
