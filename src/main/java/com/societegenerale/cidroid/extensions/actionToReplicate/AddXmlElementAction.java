@@ -37,7 +37,7 @@ public class AddXmlElementAction extends AbstractXmlProcessingAction implements 
     @Override
     public String provideContent(String documentToProcess, ResourceToUpdate resourceToUpdate) throws IssueProvidingContentException {
 
-        Document originalDocument = parseStringIntoDocument(documentToProcess, "original document");
+        Document originalDocument = parseStringIntoDocument(documentToProcess);
 
         List<Node> elementUnderXpathWeLookFor = originalDocument.selectNodes(xpathUnderWhichElementNeedsToBeAdded);
 

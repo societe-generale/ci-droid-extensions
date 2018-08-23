@@ -54,7 +54,7 @@ public class RemoveMavenDependencyOrPluginAction extends AbstractXmlProcessingAc
     @Override
     public String provideContent(String documentToProcess, ResourceToUpdate resourceToUpdate) throws IssueProvidingContentException {
 
-        Document pomXml = parseStringIntoDocument(documentToProcess, "");
+        Document pomXml = parseStringIntoDocument(documentToProcess);
 
         List<Node> dependenciesArtifact = new ArrayList<>();
 

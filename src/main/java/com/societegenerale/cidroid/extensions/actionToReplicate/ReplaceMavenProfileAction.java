@@ -55,7 +55,7 @@ public class ReplaceMavenProfileAction extends AddXmlElementAction {
     @Override
     public String provideContent(String initialContent, ResourceToUpdate resourceToUpdate) throws IssueProvidingContentException {
 
-        Document doc = parseStringIntoDocument(initialContent, "");
+        Document doc = parseStringIntoDocument(initialContent);
 
         List<Node> profilesRootSection = findProfilesNode(doc);
 

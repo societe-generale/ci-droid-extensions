@@ -37,7 +37,7 @@ public class RemoveXmlElementAction extends AbstractXmlProcessingAction implemen
     @Override
     public String provideContent(String documentToProcess, ResourceToUpdate resourceToUpdate) throws IssueProvidingContentException {
 
-        Document originalDocument = parseStringIntoDocument(documentToProcess, "");
+        Document originalDocument = parseStringIntoDocument(documentToProcess);
 
         List<Node> elementUnderXpathWeLookFor = originalDocument.selectNodes(xpathElementToRemove);
 

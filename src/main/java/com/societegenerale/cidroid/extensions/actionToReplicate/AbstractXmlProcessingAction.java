@@ -14,6 +14,8 @@ import java.util.ListIterator;
 
 public abstract class AbstractXmlProcessingAction {
 
+    protected final String ORIGINAL_DOCUMENT="original document";
+
     /**
      * This is necessary, otherwise documentToAdd will be added in default namespace, and some unexpected data will be in the output.
      * Therefore, if documentToAdd elements don't have a namespace defined, we change it to the namespace of the document in which we insert documentToAdd
@@ -34,6 +36,12 @@ public abstract class AbstractXmlProcessingAction {
         } catch (DocumentException e) {
             throw new IssueProvidingContentException("issue while parsing "+elementInError+" - is it a valid XML doc ?", e);
         }
+
+    }
+
+    protected Document parseStringIntoDocument(String documentToProcess) throws IssueProvidingContentException {
+
+       return parseStringIntoDocument(documentToProcess,ORIGINAL_DOCUMENT);
 
     }
 
