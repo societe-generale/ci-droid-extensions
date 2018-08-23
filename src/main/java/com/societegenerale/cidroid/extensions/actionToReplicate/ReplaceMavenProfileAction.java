@@ -10,18 +10,11 @@ import lombok.NoArgsConstructor;
 import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 import org.dom4j.Document;
-import org.dom4j.DocumentException;
 import org.dom4j.Node;
-import org.dom4j.io.SAXReader;
-import org.xml.sax.InputSource;
 
-import java.io.IOException;
-import java.io.StringReader;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-
-import static com.societegenerale.cidroid.extensions.actionToReplicate.XMLUtils.prettyPrint;
 
 /**
  * Given a profile name, will replace (or create it if it doesn't exist) the corresponding Maven profile with provided content. Full profile document is expected as input, starting at profile element, included.
@@ -39,7 +32,7 @@ public class ReplaceMavenProfileAction extends AddXmlElementAction {
 
     private String newProfileContent;
 
-    private final String PROFILES_XPATH="//*[local-name()='project']/*[local-name()='profiles']";
+    private final String PROFILES_XPATH = "//*[local-name()='project']/*[local-name()='profiles']";
 
     @Override
     public void init(Map<String, String> updateActionInfos) {
@@ -62,37 +55,29 @@ public class ReplaceMavenProfileAction extends AddXmlElementAction {
     @Override
     public String provideContent(String initialContent, ResourceToUpdate resourceToUpdate) throws IssueProvidingContentException {
 
-        try {
+        Document doc = parseStringIntoDocument(initialContent);
 
-            SAXReader reader = new SAXReader();
+        List<Node> profilesRootSection = findProfilesNode(doc);
 
-            Document doc=reader.read(new InputSource(new StringReader(initialContent)));
-
-            List<Node> profilesRootSection = findProfilesNode(doc);
-
-            if(profilesRootSection.isEmpty()){
-                //create profiles section
-                doc.getRootElement().addElement("profiles");
-                profilesRootSection = findProfilesNode(doc);
-            }
-
-            List<Node> expectedProfileSection = findProfileNodeWithId(doc,profileName);
-
-            if(!expectedProfileSection.isEmpty()) {
-                removeExistingProfile(expectedProfileSection);
-            }
-
-            Document profileToAdd=parseStringIntoDocument(newProfileContent,"profile to add");
-
-            putDocumentToAddUnderSameNamespaceAsParent(profileToAdd, profilesRootSection.get(0).getParent());
-
-            doc.getRootElement().element("profiles").add(profileToAdd.getRootElement());
-
-            return prettyPrint(doc);
-
-        } catch (DocumentException | IOException e) {
-            throw new IssueProvidingContentException("problem while parsing pom.xml and/or modifying it",e);
+        if (profilesRootSection.isEmpty()) {
+            //create profiles section
+            doc.getRootElement().addElement("profiles");
+            profilesRootSection = findProfilesNode(doc);
         }
+
+        List<Node> expectedProfileSection = findProfileNodeWithId(doc, profileName);
+
+        if (!expectedProfileSection.isEmpty()) {
+            removeExistingProfile(expectedProfileSection);
+        }
+
+        Document profileToAdd = parseStringIntoDocument(newProfileContent, "profile to add");
+
+        putDocumentToAddUnderSameNamespaceAsParent(profileToAdd, profilesRootSection.get(0).getParent());
+
+        doc.getRootElement().element("profiles").add(profileToAdd.getRootElement());
+
+        return prettyPrint(doc);
 
     }
 
@@ -101,7 +86,7 @@ public class ReplaceMavenProfileAction extends AddXmlElementAction {
     }
 
     private List<Node> findProfileNodeWithId(Document doc, String profileId) {
-        return doc.selectNodes(PROFILES_XPATH+"/*[local-name()='profile']/*[local-name()='id' and text()='"+profileId+"']");
+        return doc.selectNodes(PROFILES_XPATH + "/*[local-name()='profile']/*[local-name()='id' and text()='" + profileId + "']");
     }
 
     private List<Node> findProfilesNode(Document doc) {

@@ -9,14 +9,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 import org.dom4j.*;
-import org.dom4j.io.SAXReader;
-import org.xml.sax.InputSource;
 
-import java.io.IOException;
-import java.io.StringReader;
 import java.util.*;
-
-import static com.societegenerale.cidroid.extensions.actionToReplicate.XMLUtils.prettyPrint;
 
 /**
  * An action that will look in a pom.xml for an artifactID (optionally under a groupId if provided) under dependencies, dependenciesManagement or plugins, pluginsManagement, and will remove the dependency/plugin from the pom.xml
@@ -24,7 +18,7 @@ import static com.societegenerale.cidroid.extensions.actionToReplicate.XMLUtils.
 @Data
 @NoArgsConstructor
 @ToString
-public class RemoveMavenDependencyOrPluginAction implements ActionToReplicate {
+public class RemoveMavenDependencyOrPluginAction extends AbstractXmlProcessingAction implements ActionToReplicate {
 
     protected static final String ARTIFACT_ID = "artifactId";
 
@@ -60,22 +54,14 @@ public class RemoveMavenDependencyOrPluginAction implements ActionToReplicate {
     @Override
     public String provideContent(String documentToProcess, ResourceToUpdate resourceToUpdate) throws IssueProvidingContentException {
 
-        SAXReader reader = new SAXReader();
-
-        Document pomXml;
-
-        try {
-            pomXml = reader.read(new InputSource(new StringReader(documentToProcess)));
-        } catch (DocumentException e) {
-            throw new IssueProvidingContentException("issue while parsing pom.xml - is it a valid XML doc ?", e);
-        }
+        Document pomXml = parseStringIntoDocument(documentToProcess);
 
         List<Node> dependenciesArtifact = new ArrayList<>();
 
-        dependenciesArtifact.addAll(findNodesMatchingInDoc(pomXml,XPATH_FOR_DEPENDENCIES));
-        dependenciesArtifact.addAll(findNodesMatchingInDoc(pomXml,XPATH_FOR_DEPENDENCIES_MANAGEMENT));
-        dependenciesArtifact.addAll(findNodesMatchingInDoc(pomXml,XPATH_FOR_PLUGIN_MANAGEMENT));
-        dependenciesArtifact.addAll(findNodesMatchingInDoc(pomXml,XPATH_FOR_PLUGINS));
+        dependenciesArtifact.addAll(findNodesMatchingInDoc(pomXml, XPATH_FOR_DEPENDENCIES));
+        dependenciesArtifact.addAll(findNodesMatchingInDoc(pomXml, XPATH_FOR_DEPENDENCIES_MANAGEMENT));
+        dependenciesArtifact.addAll(findNodesMatchingInDoc(pomXml, XPATH_FOR_PLUGIN_MANAGEMENT));
+        dependenciesArtifact.addAll(findNodesMatchingInDoc(pomXml, XPATH_FOR_PLUGINS));
 
         dependenciesArtifact.stream()
                 //keep the ones with matchingArtifactId
@@ -85,18 +71,13 @@ public class RemoveMavenDependencyOrPluginAction implements ActionToReplicate {
                 //remove parent (ie either plugin or dependency) from the document
                 .forEach(node -> node.getParent().detach());
 
-        try {
-            return prettyPrint(pomXml);
-        } catch (IOException e) {
-            throw new IssueProvidingContentException("problem while writing the new content during processing", e);
-        }
-
+        return prettyPrint(pomXml);
     }
 
     @Override
     public List<ExpectedField> getExpectedUIFields() {
         return Arrays.asList(new TextField(ARTIFACT_ID, "the artifactId of the plugin or dependency to remove"),
-                             new TextField(GROUP_ID, "Optional - the groupId of the plugin or dependency to remove"));
+                new TextField(GROUP_ID, "Optional - the groupId of the plugin or dependency to remove"));
     }
 
     @Override
@@ -104,7 +85,7 @@ public class RemoveMavenDependencyOrPluginAction implements ActionToReplicate {
         return "will remove a dependency or plugin in pom.xml, depending on provided artifactId";
     }
 
-    private List<Node> findNodesMatchingInDoc(Document pomXml, String xpath){
+    private List<Node> findNodesMatchingInDoc(Document pomXml, String xpath) {
         XPath xpathForPluginManagement = pomXml.createXPath(xpath);
         xpathForPluginManagement.setNamespaceURIs(namespaceUris);
         return xpathForPluginManagement.selectNodes(pomXml);
@@ -122,9 +103,9 @@ public class RemoveMavenDependencyOrPluginAction implements ActionToReplicate {
         return dependencyHasMatchingGroupId(parentDependency);
     }
 
-    private boolean dependencyHasMatchingGroupId(Element parentDependency){
+    private boolean dependencyHasMatchingGroupId(Element parentDependency) {
 
-        XPath xpathGroupIdSelector = DocumentHelper.createXPath("./mvn4:groupId[text()=\""+groupId+"\"]");
+        XPath xpathGroupIdSelector = DocumentHelper.createXPath("./mvn4:groupId[text()=\"" + groupId + "\"]");
         xpathGroupIdSelector.setNamespaceURIs(namespaceUris);
 
         return !xpathGroupIdSelector.selectNodes(parentDependency).isEmpty();
