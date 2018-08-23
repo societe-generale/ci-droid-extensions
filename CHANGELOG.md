@@ -6,6 +6,7 @@
 
 ### Changed
 - Issue #3 : refactored ReplaceMavenProfileAction
+- refactored XML actions, introduced AbstractXmlProcessingAction 
 
 ### Deprecated
 
