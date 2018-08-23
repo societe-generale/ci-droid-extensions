@@ -99,6 +99,11 @@ public class AddXmlElementAction implements ActionToReplicate {
     }
 
     @Override
+    public String getDescriptionForUI() {
+        return "Add an XML element under a given XPath";
+    }
+
+    @Override
     public void init(Map<String, String> updateActionInfos) {
 
         this.elementToAdd = updateActionInfos.get(ELEMENT_TO_ADD);

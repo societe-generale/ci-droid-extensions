@@ -43,4 +43,9 @@ public class TemplateBasedContentAction implements ActionToReplicate {
     public List<ExpectedField> getExpectedUIFields() {
         return Arrays.asList(new TextArea("templatedContent", "template to use"));
     }
+
+    @Override
+    public String getDescriptionForUI() {
+        return "writes a file, based on a template and placeholder value";
+    }
 }

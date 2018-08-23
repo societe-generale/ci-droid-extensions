@@ -78,6 +78,11 @@ public class RemoveXmlElementAction implements ActionToReplicate {
     }
 
     @Override
+    public String getDescriptionForUI() {
+        return "remove an XML element identified by its XPath";
+    }
+
+    @Override
     public void init(Map<String, String> updateActionInfos) {
 
         this.xpathElementToRemove = updateActionInfos.get(XPATH_ELEMENT_THAT_NEEDS_TO_BE_REMOVED);
