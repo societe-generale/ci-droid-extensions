@@ -73,6 +73,7 @@ public class AddXmlElementActionTest {
     }
 
     @Test
+
     public void shouldThrowExceptionIfInputDocumentIsNotValidXml() {
 
         assertThatThrownBy(() -> {
@@ -91,7 +92,7 @@ public class AddXmlElementActionTest {
         assertThatThrownBy(() -> {
             addXmlElementAction.provideContent(rootWithoutNamespace+coreContent);
         }).isInstanceOf(IssueProvidingContentException.class)
-                .hasMessageContaining("elementToAdd");
+                .hasMessageContaining(ELEMENT_TO_ADD);
     }
 
     @Test
@@ -213,7 +214,7 @@ public class AddXmlElementActionTest {
         assertThat(pomBeforeActionPerformed.getProperties().getProperty("project.coverage.directory")).isNull();
         assertThat(pomBeforeActionPerformed.getProperties().getProperty("sonar.language")).isNull();
 
-        String actualResult = addThis("<project.coverage.directory>${project.build.directory}/coverage-results</project.coverage.directory><sonar.language>java</sonar.language>",pomFile);
+        String actualResult = addThis("<project.coverage.directory>${project.build.directory}/coverage-results</project.coverage.directory>  <sonar.language>java</sonar.language>",pomFile);
 
         Model newPom = pomModelreader.read(new ByteArrayInputStream(actualResult.getBytes(OUTPUT_ENCODING)));
         assertThat(newPom.getProperties().getProperty("project.coverage.directory")).isEqualTo("${project.build.directory}/coverage-results");
