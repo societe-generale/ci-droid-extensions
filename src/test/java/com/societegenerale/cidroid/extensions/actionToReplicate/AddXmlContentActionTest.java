@@ -3,6 +3,7 @@ package com.societegenerale.cidroid.extensions.actionToReplicate;
 import com.societegenerale.cidroid.api.IssueProvidingContentException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.maven.model.Model;
 import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
 import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
@@ -19,15 +20,16 @@ import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
-import static com.societegenerale.cidroid.extensions.actionToReplicate.AddXmlElementAction.ELEMENT_TO_ADD;
-import static com.societegenerale.cidroid.extensions.actionToReplicate.AddXmlElementAction.XPATH_UNDER_WHICH_ELEMENT_NEEDS_TO_BE_ADDED;
+import static com.societegenerale.cidroid.extensions.actionToReplicate.AddXmlContentAction.ELEMENT_TO_ADD;
+import static com.societegenerale.cidroid.extensions.actionToReplicate.AddXmlContentAction.XPATH_UNDER_WHICH_ELEMENT_NEEDS_TO_BE_ADDED;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.Java6Assertions.assertThat;
 
 @Slf4j
-public class AddXmlElementActionTest {
 
-    private AddXmlElementAction addXmlElementAction = new AddXmlElementAction();
+public class AddXmlContentActionTest {
+
+    private AddXmlContentAction addXmlElementAction = new AddXmlContentAction();
 
     private MavenXpp3Reader pomModelreader = new MavenXpp3Reader();
 
@@ -57,6 +59,8 @@ public class AddXmlElementActionTest {
 
     private Map<String, String> additionalInfosForInstantiation = new HashMap<>();
 
+    private ClassLoader classLoader = getClass().getClassLoader();
+
     @Before
     public void setup() {
 
@@ -71,6 +75,7 @@ public class AddXmlElementActionTest {
     }
 
     @Test
+
     public void shouldThrowExceptionIfInputDocumentIsNotValidXml() {
 
         assertThatThrownBy(() -> {
@@ -89,7 +94,7 @@ public class AddXmlElementActionTest {
         assertThatThrownBy(() -> {
             addXmlElementAction.provideContent(rootWithoutNamespace+coreContent);
         }).isInstanceOf(IssueProvidingContentException.class)
-                .hasMessageContaining("elementToAdd");
+                .hasMessageContaining(ELEMENT_TO_ADD);
     }
 
     @Test
@@ -188,27 +193,85 @@ public class AddXmlElementActionTest {
 
         String pomFile="dummyPomXml_dependenciesRemoval.xml";
 
-        String valueToAdd="${project.build.directory}/coverage-results";
-
-        ClassLoader classLoader = getClass().getClassLoader();
-
         Model pomBeforeActionPerformed = pomModelreader.read(classLoader.getResourceAsStream(pomFile));
+
         // checking BEFORE the action that property is NOT there..
         assertThat(pomBeforeActionPerformed.getProperties().getProperty("project.coverage.directory")).isNull();
 
+        String actualResult = addThis(pomFile,"<project.coverage.directory>${project.build.directory}/coverage-results</project.coverage.directory>");
+
+        Model newPom = pomModelreader.read(new ByteArrayInputStream(actualResult.getBytes(OUTPUT_ENCODING)));
+        assertThat(newPom.getProperties().getProperty("project.coverage.directory")).isEqualTo("${project.build.directory}/coverage-results");
+
+    }
+
+    @Test
+    public void shouldAdd3ElementsAtOnce() throws IssueProvidingContentException, IOException, XmlPullParserException {
+
+        Map<String,String> expectedPropertiesValues=new HashMap<>();
+        expectedPropertiesValues.put("project.coverage.directory","${project.build.directory}/coverage-results");
+        expectedPropertiesValues.put("sonar.language","java");
+        expectedPropertiesValues.put("some.other.prop","someValue");
+
+
+        shouldAddElementsAndAssertProperties(expectedPropertiesValues,"<project.coverage.directory>${project.build.directory}/coverage-results</project.coverage.directory>",
+                                                                      "<sonar.language>java</sonar.language>",
+                                                                      "<some.other.prop>someValue</some.other.prop>");
+    }
+
+
+
+    @Test
+    public void shouldAdd2ContiguousElementsAtOnce() throws IssueProvidingContentException, IOException, XmlPullParserException {
+
+        Map<String,String> expectedPropertiesValues=new HashMap<>();
+        expectedPropertiesValues.put("project.coverage.directory","${project.build.directory}/coverage-results");
+        expectedPropertiesValues.put("sonar.language","java");
+
+        shouldAddElementsAndAssertProperties(expectedPropertiesValues,"<project.coverage.directory>${project.build.directory}/coverage-results</project.coverage.directory>",
+                                                                      "<sonar.language>java</sonar.language>");
+    }
+
+    @Test
+    public void shouldAdd2ElementsSeparatedBySpaceAtOnce() throws IOException, XmlPullParserException, IssueProvidingContentException {
+
+        Map<String,String> expectedPropertiesValues=new HashMap<>();
+        expectedPropertiesValues.put("project.coverage.directory","${project.build.directory}/coverage-results");
+        expectedPropertiesValues.put("sonar.language","java");
+
+        shouldAddElementsAndAssertProperties(expectedPropertiesValues,"<project.coverage.directory>${project.build.directory}/coverage-results</project.coverage.directory>",
+                                                                      "   ",
+                                                                      "<sonar.language>java</sonar.language>");
+    }
+
+    private void shouldAddElementsAndAssertProperties(Map<String,String> expectedPropertyValues, String... whatToAdd) throws IOException, XmlPullParserException, IssueProvidingContentException {
+
+        String pomFile="dummyPomXml_dependenciesRemoval.xml";
+
+        Model pomBeforeActionPerformed = pomModelreader.read(classLoader.getResourceAsStream(pomFile));
+
+        // checking BEFORE the action that property is NOT there..
+        assertThat(pomBeforeActionPerformed.getProperties().getProperty("project.coverage.directory")).isNull();
+        assertThat(pomBeforeActionPerformed.getProperties().getProperty("sonar.language")).isNull();
+
+        String actualResult = addThis(pomFile,whatToAdd);
+
+        Model newPom = pomModelreader.read(new ByteArrayInputStream(actualResult.getBytes(OUTPUT_ENCODING)));
+
+        expectedPropertyValues.entrySet().stream().forEach(e ->  assertThat(newPom.getProperties().getProperty(e.getKey())).isEqualTo(e.getValue()));
+    }
+
+    private String addThis(String pomFile, String... stuffToAdd) throws IOException, IssueProvidingContentException {
+
         additionalInfosForInstantiation.put(XPATH_UNDER_WHICH_ELEMENT_NEEDS_TO_BE_ADDED, "//*[local-name()='project']/*[local-name()='properties']");
-        additionalInfosForInstantiation.put(ELEMENT_TO_ADD, "<project.coverage.directory>"+valueToAdd+"</project.coverage.directory>");
+        additionalInfosForInstantiation.put(ELEMENT_TO_ADD,String.join(StringUtils.EMPTY,stuffToAdd) );
 
         addXmlElementAction.init(additionalInfosForInstantiation);
 
         String pomXmlBeforeAction= IOUtils.toString(classLoader.getResourceAsStream(pomFile), StandardCharsets.UTF_8);
-        String actualResult = addXmlElementAction.provideContent(pomXmlBeforeAction);
 
-        log.info("actual result: " + actualResult);
+        return addXmlElementAction.provideContent(pomXmlBeforeAction);
 
-        Model newPom = pomModelreader.read(new ByteArrayInputStream(actualResult.getBytes(OUTPUT_ENCODING)));
-
-        assertThat(newPom.getProperties().getProperty("project.coverage.directory")).isEqualTo(valueToAdd);
     }
 
 }

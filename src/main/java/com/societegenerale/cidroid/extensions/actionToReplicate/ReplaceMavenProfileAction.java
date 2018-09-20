@@ -26,7 +26,7 @@ import java.util.Map;
 @AllArgsConstructor
 @ToString
 @Slf4j
-public class ReplaceMavenProfileAction extends AddXmlElementAction {
+public class ReplaceMavenProfileAction extends AddXmlContentAction {
 
     private String profileName;
 
