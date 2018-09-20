@@ -7,6 +7,7 @@
 ### Changed
 - Issue #3 : refactored ReplaceMavenProfileAction
 - refactored XML actions, introduced AbstractXmlProcessingAction 
+- Issue #6 : renamed AddXmlElementAction into AddXmlContentAction - not limited to single element anymore
 
 ### Deprecated
 

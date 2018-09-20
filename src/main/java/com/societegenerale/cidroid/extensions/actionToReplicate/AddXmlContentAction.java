@@ -28,8 +28,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
-import static java.util.Collections.emptyList;
-
 /**
  * An action that will look for an xpath element, and if found, will add the provided element(s) in it, in last position (if there are existing children).
  */
@@ -37,7 +35,7 @@ import static java.util.Collections.emptyList;
 @NoArgsConstructor
 @Slf4j
 @ToString
-public class AddXmlElementAction extends AbstractXmlProcessingAction implements ActionToReplicate {
+public class AddXmlContentAction extends AbstractXmlProcessingAction implements ActionToReplicate {
 
     protected static final String ELEMENT_TO_ADD = "elementToAdd";
 
@@ -128,36 +126,22 @@ public class AddXmlElementAction extends AbstractXmlProcessingAction implements 
 
         List<String> endBlocksForEachElementAtRootLevel = new ArrayList<>();
 
-        List<XMLEvent> nextBlockEvents = emptyList();
+        while (thereIsStillSomethingToParse(documentToProcess)) {
+            String closingElementOfNextXmlBlockEvents = findClosingElementOfNextXmlBlockEvents(documentToProcess);
 
-        do {
-            nextBlockEvents = readNextXmlBlockEvents(documentToProcess);
+            endBlocksForEachElementAtRootLevel.add(closingElementOfNextXmlBlockEvents);
 
-            if (!nextBlockEvents.isEmpty()) {
-
-                log.debug("got new block, containing {} events", nextBlockEvents.size());
-
-                String closingEvent = nextBlockEvents.get(nextBlockEvents.size() - 1).toString();
-
-                endBlocksForEachElementAtRootLevel.add(closingEvent);
-
-                documentToProcess = removeParsedBlockFromGlobalDocument(documentToProcess, closingEvent);
-            }
-
+            documentToProcess = removeParsedBlockFromGlobalDocument(documentToProcess, closingElementOfNextXmlBlockEvents);
         }
-        while (thereIsStillSomethingToParse(documentToProcess) && !nextBlockEvents.isEmpty());
 
         return endBlocksForEachElementAtRootLevel;
-
     }
 
     private boolean thereIsStillSomethingToParse(String documentToProcess) {
         return !documentToProcess.isEmpty();
     }
 
-    private List<XMLEvent> readNextXmlBlockEvents(String documentToProcess) throws IssueProvidingContentException {
-
-        List<XMLEvent> eventsFormingABlock = new ArrayList<>();
+    private String findClosingElementOfNextXmlBlockEvents(String documentToProcess) throws IssueProvidingContentException {
 
         XMLInputFactory factory = XMLInputFactory.newInstance();
         XMLEventReader reader = null;
@@ -186,7 +170,6 @@ public class AddXmlElementAction extends AbstractXmlProcessingAction implements 
                     throw new IssueProvidingContentException(
                             "issue while parsing " + ELEMENT_TO_ADD + " " + documentToProcess + " - is it a valid XML doc ?", e);
                 }
-
             }
 
             if (event.isEndDocument()) {
@@ -196,18 +179,17 @@ public class AddXmlElementAction extends AbstractXmlProcessingAction implements 
             if (eventIsFirstElement(event, currentElement)) {
                 currentElement = event.asStartElement().getName().getLocalPart();
             }
-            else if (event.isEndElement() && eventIsTheClosingElementOfFirstElement(currentElement, event)) {
-                currentElement = null;
+            else if (eventIsTheClosingElementOfFirstElement(currentElement, event)) {
+                return event.toString();
             }
 
-            eventsFormingABlock.add(event);
         }
 
-        return eventsFormingABlock;
+        throw new IssueProvidingContentException("couldn't find a closing element for "+currentElement+". Parsed document was "+documentToProcess);
     }
 
     private boolean eventIsTheClosingElementOfFirstElement(String currentElement, XMLEvent event) {
-        return event.asEndElement().getName().getLocalPart().equals(currentElement);
+        return event.isEndElement() && event.asEndElement().getName().getLocalPart().equals(currentElement);
     }
 
     private boolean eventIsFirstElement(XMLEvent event, String currentElement) {
@@ -222,7 +204,7 @@ public class AddXmlElementAction extends AbstractXmlProcessingAction implements 
 
     @Override
     public String getDescriptionForUI() {
-        return "Add an XML element under a given XPath";
+        return "Adds some XML content under a given XPath";
     }
 
     @Override

@@ -24,7 +24,7 @@ public abstract class AbstractXmlProcessingAction {
      */
     protected void putDocumentToAddUnderSameNamespaceAsParent(Document documentToAdd, Element lastElementInOriginalDocument) {
         Namespace parentNamespace=lastElementInOriginalDocument.getNamespace();
-        documentToAdd.accept(new AddXmlElementAction.NamespaceChangingVisitor(Namespace.NO_NAMESPACE, parentNamespace));
+        documentToAdd.accept(new AddXmlContentAction.NamespaceChangingVisitor(Namespace.NO_NAMESPACE, parentNamespace));
     }
 
     protected Document parseStringIntoDocument(String documentToProcess, String elementInError) throws IssueProvidingContentException {
