@@ -23,10 +23,15 @@ import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.events.XMLEvent;
 import java.io.IOException;
 import java.io.StringReader;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+
+import static java.util.Collections.emptyList;
 
 /**
- * An action that will look for an xpath element, and if found, will add an element in it, in last position (if there are existing children)
+ * An action that will look for an xpath element, and if found, will add the provided element(s) in it, in last position (if there are existing children).
  */
 @Data
 @NoArgsConstructor
@@ -55,24 +60,30 @@ public class AddXmlElementAction extends AbstractXmlProcessingAction implements 
 
         Node lastNodeMatching = elementUnderXpathWeLookFor.get(elementUnderXpathWeLookFor.size() - 1);
 
-        List<Document> documentsToAdd = parseStringIntoDocuments(elementToAdd, ELEMENT_TO_ADD);
-
         Element lastElementInOriginalDocument = (Element) lastNodeMatching;
+
+        List<Document> documentsToAdd = parseStringIntoDocuments(elementToAdd);
+
+        addDocumentsAfter(documentsToAdd, lastElementInOriginalDocument);
+
+        return prettyPrint(originalDocument);
+
+    }
+
+    private void addDocumentsAfter(List<Document> documentsToAdd, Element lastElementInOriginalDocument) {
 
         for (Document documentToAdd : documentsToAdd) {
             putDocumentToAddUnderSameNamespaceAsParent(documentToAdd, lastElementInOriginalDocument);
             lastElementInOriginalDocument.add(documentToAdd.getRootElement());
         }
 
-        return prettyPrint(originalDocument);
-
     }
 
-    protected List<Document> parseStringIntoDocuments(String documentToProcess, String elementInError) throws IssueProvidingContentException {
+    protected List<Document> parseStringIntoDocuments(String documentToProcess) throws IssueProvidingContentException {
 
-        List<String> endBlocksForRootElements = endBlocksForRootElements(documentToProcess);
+        List<String> endBlocksForRootElements = findEndBlocksForRootElements(documentToProcess);
 
-        List<Document> documents = new ArrayList<>();
+        List<Document> parsedDocumentsFromProvidedGlobalDoc = new ArrayList<>();
 
         SAXReader reader = new SAXReader();
 
@@ -82,52 +93,69 @@ public class AddXmlElementAction extends AbstractXmlProcessingAction implements 
 
                 String endBlock = endBlocksForRootElements.get(i);
 
-                String xmlBlock = documentToProcess.substring(0, documentToProcess.indexOf(endBlock) + endBlock.length());
+                String standaloneXmlBlock = findFirstXmlBlockEndingWithElement(documentToProcess, endBlock);
 
-                Document doc = reader.read(new InputSource(new StringReader(xmlBlock)));
+                Document documentForTheBlock = reader.read(new InputSource(new StringReader(standaloneXmlBlock)));
 
-                documents.add(doc);
+                parsedDocumentsFromProvidedGlobalDoc.add(documentForTheBlock);
 
-                if (i != endBlocksForRootElements.size() - 1) {
-                    documentToProcess = documentToProcess.substring(documentToProcess.indexOf(endBlock) + endBlock.length() + 1);
+                if (notTheLastBlockBeingProcessed(endBlocksForRootElements, i)) {
+                    documentToProcess = removeParsedBlockFromGlobalDocument(documentToProcess, endBlock);
                 }
             }
 
-            return documents;
+            return parsedDocumentsFromProvidedGlobalDoc;
+
         } catch (DocumentException e) {
-            throw new IssueProvidingContentException("issue while parsing " + elementInError + " - is it a valid XML doc ?", e);
+            throw new IssueProvidingContentException("issue while parsing " + ELEMENT_TO_ADD + " - is it a valid XML doc ?", e);
         }
 
     }
 
-    private List<String> endBlocksForRootElements(String documentToProcess) throws IssueProvidingContentException {
+    private boolean notTheLastBlockBeingProcessed(List<String> endBlocksForRootElements, int indexOfElementBeingProcessed) {
+        return (indexOfElementBeingProcessed != endBlocksForRootElements.size() - 1);
+    }
 
-        List<String> endBlocks = new ArrayList<>();
+    private String findFirstXmlBlockEndingWithElement(String documentToParse, String endElement) {
+        return documentToParse.substring(0, documentToParse.indexOf(endElement) + endElement.length());
+    }
 
-        List<XMLEvent> nextBlock = Collections.emptyList();
+    private String removeParsedBlockFromGlobalDocument(String globalDocument, String endElement) {
+        return globalDocument.substring(globalDocument.indexOf(endElement) + endElement.length());
+    }
+
+    private List<String> findEndBlocksForRootElements(String documentToProcess) throws IssueProvidingContentException {
+
+        List<String> endBlocksForEachElementAtRootLevel = new ArrayList<>();
+
+        List<XMLEvent> nextBlockEvents = emptyList();
 
         do {
-            nextBlock = readNextXmlBlock(documentToProcess);
+            nextBlockEvents = readNextXmlBlockEvents(documentToProcess);
 
-            if (!nextBlock.isEmpty()) {
+            if (!nextBlockEvents.isEmpty()) {
 
-                System.out.println("got new block, containing " + nextBlock.size() + " events");
+                log.debug("got new block, containing {} events", nextBlockEvents.size());
 
-                String closingEvent = nextBlock.get(nextBlock.size() - 1).toString();
+                String closingEvent = nextBlockEvents.get(nextBlockEvents.size() - 1).toString();
 
-                endBlocks.add(closingEvent);
+                endBlocksForEachElementAtRootLevel.add(closingEvent);
 
-                documentToProcess = documentToProcess.substring(documentToProcess.indexOf(closingEvent) + closingEvent.length());
+                documentToProcess = removeParsedBlockFromGlobalDocument(documentToProcess, closingEvent);
             }
 
         }
-        while (!documentToProcess.isEmpty() && !nextBlock.isEmpty());
+        while (thereIsStillSomethingToParse(documentToProcess) && !nextBlockEvents.isEmpty());
 
-        return endBlocks;
+        return endBlocksForEachElementAtRootLevel;
 
     }
 
-    private List<XMLEvent> readNextXmlBlock(String documentToProcess) throws IssueProvidingContentException {
+    private boolean thereIsStillSomethingToParse(String documentToProcess) {
+        return !documentToProcess.isEmpty();
+    }
+
+    private List<XMLEvent> readNextXmlBlockEvents(String documentToProcess) throws IssueProvidingContentException {
 
         List<XMLEvent> eventsFormingABlock = new ArrayList<>();
 
@@ -136,10 +164,8 @@ public class AddXmlElementAction extends AbstractXmlProcessingAction implements 
 
         try {
             reader = factory.createXMLEventReader(IOUtils.toInputStream(documentToProcess, "UTF-8"));
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (XMLStreamException e) {
-            e.printStackTrace();
+        } catch (XMLStreamException | IOException e) {
+            log.warn("problem while parsing this document : " + documentToProcess, e);
         }
 
         String currentElement = null;
@@ -151,47 +177,41 @@ public class AddXmlElementAction extends AbstractXmlProcessingAction implements 
                 event = reader.nextEvent();
             } catch (XMLStreamException e) {
 
-                if(e.getMessage().contains("The markup in the document following the root element must be well-formed")){
+                //not great.. but didn't find a better way for now. In case we try to add several elements at once, an XMLStreamException will be thrown, with below message
+                //Apart from exception message content, there's no way to differentiate between a really malformed xml String (missing closing element for ex) and a doc with 2 elements at the root (which in our case should be considered valid)
+                if (e.getMessage().contains("The markup in the document following the root element must be well-formed")) {
                     log.info("problem while parsing document  - but it's very likely because there are several root elements, it will be handled", e);
                     break;
-                }
-                else{
-                    throw new IssueProvidingContentException("issue while parsing "+ELEMENT_TO_ADD+" "+documentToProcess+" - is it a valid XML doc ?", e);
+                } else {
+                    throw new IssueProvidingContentException(
+                            "issue while parsing " + ELEMENT_TO_ADD + " " + documentToProcess + " - is it a valid XML doc ?", e);
                 }
 
             }
-
-            System.out.println("event : " + event.toString());
 
             if (event.isEndDocument()) {
                 break;
             }
 
-            if (event.isStartElement() && currentElement == null) {
-                currentElement = event.asStartElement().getName()
-                        .getLocalPart();
-
-               // eventsFormingABlock.add(event);
-            } else if (event.isEndElement()) {
-
-                if (event.asEndElement().getName().getLocalPart().equals(currentElement)) {
-
-                    eventsFormingABlock.add(event);
-
-                    String closingElement = "</" + currentElement + ">";
-
-                    String restOfDocumentToProcess = documentToProcess.substring(documentToProcess.indexOf(closingElement) + closingElement.length());
-
-                    currentElement = null;
-
-                    System.out.println("rest of doc: " + restOfDocumentToProcess);
-                }
-            } else if (currentElement != null) {
-                eventsFormingABlock.add(event);
+            if (eventIsFirstElement(event, currentElement)) {
+                currentElement = event.asStartElement().getName().getLocalPart();
             }
+            else if (event.isEndElement() && eventIsTheClosingElementOfFirstElement(currentElement, event)) {
+                currentElement = null;
+            }
+
+            eventsFormingABlock.add(event);
         }
 
         return eventsFormingABlock;
+    }
+
+    private boolean eventIsTheClosingElementOfFirstElement(String currentElement, XMLEvent event) {
+        return event.asEndElement().getName().getLocalPart().equals(currentElement);
+    }
+
+    private boolean eventIsFirstElement(XMLEvent event, String currentElement) {
+        return event.isStartElement() && currentElement == null;
     }
 
     @Override
