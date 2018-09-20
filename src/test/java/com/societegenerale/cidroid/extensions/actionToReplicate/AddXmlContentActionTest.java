@@ -59,7 +59,7 @@ public class AddXmlContentActionTest {
 
     private Map<String, String> additionalInfosForInstantiation = new HashMap<>();
 
-    ClassLoader classLoader = getClass().getClassLoader();
+    private ClassLoader classLoader = getClass().getClassLoader();
 
     @Before
     public void setup() {
