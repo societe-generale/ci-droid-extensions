@@ -60,7 +60,7 @@ public class AddXmlContentAction extends AbstractXmlProcessingAction implements 
 
         Element lastElementInOriginalDocument = (Element) lastNodeMatching;
 
-        List<Document> documentsToAdd = parseStringIntoDocuments(elementToAdd);
+        List<Document> documentsToAdd = parseStringIntoDocuments(elementToAdd.trim());
 
         addDocumentsAfter(documentsToAdd, lastElementInOriginalDocument);
 
