@@ -5,6 +5,7 @@
 ### Added
 
 ### Changed
+- upgrading to ci-droid internal-api 1.0.5
 
 ### Deprecated
 
