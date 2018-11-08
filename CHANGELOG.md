@@ -5,11 +5,18 @@
 ### Added
 
 ### Changed
-- upgrading to ci-droid internal-api 1.0.5
 
 ### Deprecated
 
 ### Removed
+
+### Fixed
+
+
+## [1.0.6] - 2018-11-08
+
+### Changed
+- upgrading to ci-droid internal-api 1.0.5
 
 ### Fixed
 - Issue #9 : TemplateBasedContentAction now inits itself properly
