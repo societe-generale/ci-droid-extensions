@@ -36,7 +36,7 @@ public class TemplateBasedContentAction implements ActionToReplicate {
 
     @Override
     public void init(Map<String, String> actionDetails) {
-        this.templatedContent = actionDetails.get("newProfileContent");
+        this.templatedContent = actionDetails.get("templatedContent");
     }
 
     @Override
