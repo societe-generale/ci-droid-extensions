@@ -5,6 +5,9 @@ import com.societegenerale.cidroid.api.ResourceToUpdate;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import static com.societegenerale.cidroid.extensions.actionToReplicate.TemplateBasedContentAction.PLACEHOLDER_VALUE;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -19,6 +22,18 @@ public class TemplateBasedContentActionTest {
     public void setup() {
         resourceToUpdate.setPlaceHolderValue("specificValue");
     }
+
+    @Test
+    public void shouldInitAsExpected() {
+
+        Map<String,String> initFields=new HashMap<>();
+        initFields.put("templatedContent","blablabla");
+
+        templateBasedContentAction.init(initFields);
+
+        assertThat(templateBasedContentAction.getTemplatedContent()).isEqualTo("blablabla");
+    }
+
 
     @Test
     public void shouldProvideContentWithReplacedPlaceHolder() throws IssueProvidingContentException {
