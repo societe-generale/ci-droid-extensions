@@ -12,6 +12,7 @@
 ### Removed
 
 ### Fixed
+- Issue #11 : trimming elementsToAdd to avoid parsing errors
 
 ## [1.0.5] - 2018-09-20
 

@@ -219,6 +219,21 @@ public class AddXmlContentActionTest {
                                                                       "<some.other.prop>someValue</some.other.prop>");
     }
 
+    @Test
+    public void shouldAddElementsEvenIfEndsWithBlankCharacters() throws IssueProvidingContentException, IOException, XmlPullParserException {
+
+        Map<String,String> expectedPropertiesValues=new HashMap<>();
+        expectedPropertiesValues.put("project.coverage.directory","${project.build.directory}/coverage-results");
+        expectedPropertiesValues.put("sonar.language","java");
+        expectedPropertiesValues.put("some.other.prop","someValue");
+
+
+        shouldAddElementsAndAssertProperties(expectedPropertiesValues,"<project.coverage.directory>${project.build.directory}/coverage-results</project.coverage.directory>",
+                "<sonar.language>java</sonar.language>",
+                "<some.other.prop>someValue</some.other.prop>  \n\r\n");
+    }
+
+
 
 
     @Test
