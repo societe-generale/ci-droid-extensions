@@ -4,6 +4,7 @@ import com.societegenerale.cidroid.api.IssueProvidingContentException;
 import com.societegenerale.cidroid.api.ResourceToUpdate;
 import com.societegenerale.cidroid.api.actionToReplicate.ActionToReplicate;
 import com.societegenerale.cidroid.api.actionToReplicate.fields.ExpectedField;
+import com.societegenerale.cidroid.api.actionToReplicate.fields.TextArea;
 import com.societegenerale.cidroid.api.actionToReplicate.fields.TextField;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -199,7 +200,7 @@ public class AddXmlContentAction extends AbstractXmlProcessingAction implements 
     @Override
     public List<ExpectedField> getExpectedUIFields() {
         return Arrays.asList(new TextField(ELEMENT_TO_ADD, "the XML element to add"),
-                new TextField(XPATH_UNDER_WHICH_ELEMENT_NEEDS_TO_BE_ADDED, "The Xpath under which the element needs to be added"));
+                             new TextArea(XPATH_UNDER_WHICH_ELEMENT_NEEDS_TO_BE_ADDED, "The Xpath under which the element needs to be added"));
     }
 
     @Override

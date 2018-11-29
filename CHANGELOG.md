@@ -5,6 +5,7 @@
 ### Added
 
 ### Changed
+- elementToAdd in AddXmlContentAction is now a textArea
 
 ### Deprecated
 
