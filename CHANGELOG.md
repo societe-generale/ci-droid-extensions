@@ -17,6 +17,7 @@
 ### Changed
 - elementToAdd in AddXmlContentAction is now a textArea
 - upgrading to ci-droid internal-api 1.0.6
+- making ci-droid internal-api a "provided" dependencies, to avoid version conflicts in projects that will use both
 
 ## [1.0.6] - 2018-11-08
 
