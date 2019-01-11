@@ -5,7 +5,6 @@
 ### Added
 
 ### Changed
-- elementToAdd in AddXmlContentAction is now a textArea
 
 ### Deprecated
 
@@ -13,6 +12,11 @@
 
 ### Fixed
 
+## [1.0.7] - 2019-01-11
+
+### Changed
+- elementToAdd in AddXmlContentAction is now a textArea
+- upgrading to ci-droid internal-api 1.0.6
 
 ## [1.0.6] - 2018-11-08
 
