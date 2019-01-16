@@ -4,27 +4,41 @@ import com.societegenerale.cidroid.api.actionToReplicate.ActionToReplicate;
 import org.junit.Test;
 import org.reflections.Reflections;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class ActionToReplicateTest {
 
+    private  Reflections reflections = new Reflections("com.societegenerale.cidroid.extensions.actionToReplicate");
+
+    private Set<Class<? extends ActionToReplicate>> actionsToReplicateClasses = reflections.getSubTypesOf(ActionToReplicate.class);
+
     @Test
-    public void uiMethodsShouldReturnSomething() throws IllegalAccessException, InstantiationException {
+    public void shouldHaveExpectedUIFields() throws IllegalAccessException, InstantiationException {
 
-        Reflections reflections = new Reflections("com.societegenerale.cidroid.extensions.actionToReplicate");
-
-        Set<Class<? extends ActionToReplicate>> actionsToReplicateClasses = reflections.getSubTypesOf(ActionToReplicate.class);
+        List<Class> exceptions = Arrays.asList(DeleteResourceAction.class);
 
         for (Class clazz : actionsToReplicateClasses) {
 
+            if (!exceptions.contains(clazz)) {
+
+                ActionToReplicate actionToReplicate = (ActionToReplicate) clazz.newInstance();
+
+                assertThat(actionToReplicate.getExpectedUIFields()).as(actionToReplicate.getClass().getName() + " should have expected fields").isNotEmpty();
+            }
+        }
+    }
+
+    @Test
+    public void shouldHaveDescriptionForUI() throws IllegalAccessException, InstantiationException {
+
+        for (Class clazz : actionsToReplicateClasses) {
             ActionToReplicate actionToReplicate = (ActionToReplicate) clazz.newInstance();
 
-            String className=actionToReplicate.getClass().getName();
-
-            assertThat(actionToReplicate.getDescriptionForUI()).as(className+" should have a description").isNotBlank();
-            assertThat(actionToReplicate.getExpectedUIFields()).as(className+" should have expected fields").isNotEmpty();
+            assertThat(actionToReplicate.getDescriptionForUI()).as(actionToReplicate.getClass().getName() + " should have a description").isNotBlank();
         }
     }
 }

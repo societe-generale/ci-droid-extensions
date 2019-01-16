@@ -3,6 +3,7 @@
 ## [Unreleased]
 
 ### Added
+- adding DeleteResourceAction, as required by https://github.com/societe-generale/ci-droid-tasks-consumer/issues/50
 
 ### Changed
 
