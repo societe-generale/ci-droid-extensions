@@ -3,7 +3,6 @@
 ## [Unreleased]
 
 ### Added
-- adding DeleteResourceAction, as required by https://github.com/societe-generale/ci-droid-tasks-consumer/issues/50
 
 ### Changed
 
@@ -12,6 +11,11 @@
 ### Removed
 
 ### Fixed
+
+## [1.0.8] - 2019-01-16
+
+### Added
+- adding DeleteResourceAction, as required by https://github.com/societe-generale/ci-droid-tasks-consumer/issues/50
 
 ## [1.0.7] - 2019-01-11
 
