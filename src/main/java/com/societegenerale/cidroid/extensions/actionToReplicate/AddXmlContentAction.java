@@ -199,8 +199,8 @@ public class AddXmlContentAction extends AbstractXmlProcessingAction implements 
 
     @Override
     public List<ExpectedField> getExpectedUIFields() {
-        return Arrays.asList(new TextField(ELEMENT_TO_ADD, "the XML element to add"),
-                             new TextArea(XPATH_UNDER_WHICH_ELEMENT_NEEDS_TO_BE_ADDED, "The Xpath under which the element needs to be added"));
+        return Arrays.asList(new TextArea(ELEMENT_TO_ADD, "the XML element to add"),
+                             new TextField(XPATH_UNDER_WHICH_ELEMENT_NEEDS_TO_BE_ADDED, "The Xpath under which the element needs to be added"));
     }
 
     @Override

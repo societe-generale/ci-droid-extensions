@@ -12,6 +12,12 @@
 
 ### Fixed
 
+## [1.0.9] - 2019-03-13
+
+### Fixed 
+- in AddXmlContentAction, elementToAdd is now a textArea, and xpathUnderWhichElementNeedsToBeAdded is a textField (was declared vice-versa)
+
+
 ## [1.0.8] - 2019-01-16
 
 ### Added
