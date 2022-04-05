@@ -149,7 +149,7 @@ public class AddXmlContentAction extends AbstractXmlProcessingAction implements 
 
         try {
             reader = factory.createXMLEventReader(IOUtils.toInputStream(documentToProcess, "UTF-8"));
-        } catch (XMLStreamException | IOException e) {
+        } catch (XMLStreamException e) {
             log.warn("problem while parsing this document : " + documentToProcess, e);
         }
 
