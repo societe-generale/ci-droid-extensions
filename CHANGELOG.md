@@ -12,6 +12,12 @@
 
 ### Fixed
 
+## [1.0.10] - 2022-04-05
+
+### Changed
+- upgraded libraries : logback-classic, commons-io, dom4j, junit
+- replaced Travis CI by Github actions for build activities 
+
 ## [1.0.9] - 2019-03-13
 
 ### Fixed 
